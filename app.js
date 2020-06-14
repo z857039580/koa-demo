@@ -4,7 +4,7 @@ const app = new Koa();
 
 app.use(bodyParser());
 
-const router = require('./router')
+const router = require('./routers')
 app.use(router.routes());
 
 

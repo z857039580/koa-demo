@@ -1,8 +1,9 @@
-exports.login = ctx => {
-    ctx.body = 'login'
+module.exports = {
+    login: (ctx) => {
+        ctx.body = 'login'
+    },
+    register: ctx => {
+        ctx.body = 'register'
+    }
 }
 
-
-exports.register = ctx => {
-    ctx.body = 'register'
-}
