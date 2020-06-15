@@ -1,27 +1,28 @@
-const config = require('../config')
-const db = require('../db')
+const {res_success, err_system, res_warning} = require('../util/funcUtils');
+const {sql_select, sql_findOrCreate} = require('../db');
 
-const userTable = 'user'
+const userTable = 'user';
 
-exports.login = async function (ctx) {
-    await db.select(userTable, ctx.request.body).then(function (data) {
-        if (data.length > 0) {
-            ctx.body(config.success(data[0]))
-        } else {
-            ctx.body(config.errMsg(1001, '用户不存在或账号密码有误'))
-        }
-    }, err => {
-        ctx.body(err)
-    })
-}
-exports.register = async function (ctx) {
-    await db.findOrCreate(userTable, ctx.request.body, {username: ctx.request.body.username}).then(function (result) {
-        if (!result) {
-            ctx.body(config.errMsg(1002, '用户名已存在'))
-        } else {
-            ctx.body(config.success())
-        }
-    }, err => {
-        ctx.body(err)
-    })
-}
+exports.login = async (ctx) => {
+    const result = await sql_select(userTable, ctx.request.body).catch(err => {
+        ctx.body = err_system(err);
+    });
+    if (!result) return;
+
+    if (result.length > 0 && result[0]['username'] === ctx.request.body.username) {
+        ctx.body = res_success(result[0]);
+    }
+};
+
+exports.register = async (ctx) => {
+    const where_obj = {username: ctx.request.body.username};
+    const result = await sql_findOrCreate(userTable, ctx.request.body, where_obj).catch(err => {
+        ctx.body = err_system(err);
+    });
+    if (!result) return;
+
+    if (result > 0) {
+        return ctx.body = res_warning(1001, '用户名已存在');
+    }
+    ctx.body = res_success();
+};
